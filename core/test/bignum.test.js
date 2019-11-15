@@ -17,6 +17,11 @@ describe('Bignum test', () => {
             const b = new Int('23');
             assert.equal(bigNum.sum(a, b), '34');
         });
+        it('9999999 + 1 = 10000000', () => {
+            const a = new Int('9999999');
+            const b = new Int('1');
+            assert.equal(bigNum.sum(a, b), '10000000');
+        });
         it('10 + 10 != 21', () => {
             const a = new Int('10');
             const b = new Int('10');
