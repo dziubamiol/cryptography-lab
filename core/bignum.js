@@ -31,8 +31,8 @@ class Bignum {
                 return reverse ? 1 : 2;
             }
             if (A.length === B.length) {
-                const aDigits = A.split('').reverse();
-                const bDigits = B.split('').reverse();
+                const aDigits = A.split('');
+                const bDigits = B.split('');
 
                 for (let i = 0; i < A.length; i++) {
                     if (reverse && aDigits[i] !== bDigits[i]) {
@@ -132,9 +132,9 @@ class Bignum {
     }
 
     /**
-     * Substr function return the substruction of two Int instances
-     * @property {Int} numA - first num to make sum
-     * @property {Int} numB - second num to make sum
+     * Substr function return the subtruction of two Int instances
+     * @property {Int} numA - first num to make subtruction
+     * @property {Int} numB - second num to make subtruction
      * @return {Int}
      * */
     substr(numA, numB) {
@@ -200,6 +200,128 @@ class Bignum {
         truncateZero(r);
         r = r.reverse().join('');
 
+        return new a.constructor(r, sign);
+    }
+
+    /**
+     * Mult function return the multiply of two Int instances
+     * @property {Int} numA - first num to make multiply
+     * @property {Int} numB - second num to make multiply
+     * @return {Int}
+     * */
+    mult(numA, numB) {
+        let a = numA;
+        let b = numB;
+
+        if (this.constructor.name === 'Int' && !numB) {
+            a = this;
+            b = numA;
+        }
+
+        if (a.number.length < b.number.length) {
+            const temp = a;
+            a = b;
+            b = temp;
+        }
+
+        const aDigitsRev = a.number.split('').reverse();
+        const bDigitsRev = b.number.split('').reverse();
+
+        const sign = !!(a.sign ^ b.sign);
+        const multResut = [];
+        for (let i = 0; i < bDigitsRev.length; i++) {
+            let extraDigit = 0;
+            let digitMultiply = new Array(i).fill('0');
+            for (let j = 0; j < aDigitsRev.length; j++) {
+                const result = parseInt(aDigitsRev[j], 10) * parseInt(bDigitsRev[i], 10) + extraDigit;
+                extraDigit = Math.floor(result / 10);
+                digitMultiply.push((result % 10).toString());
+            }
+            if (extraDigit > 0) {
+                digitMultiply.push(extraDigit.toString());
+            }
+            digitMultiply = digitMultiply.reverse().join('');
+            multResut.push(new a.constructor(digitMultiply));
+        }
+
+        while (multResut.length > 1) {
+            multResut[0] = this.sum(multResut[0], multResut[1]);
+            multResut.splice(1, 1);
+        }
+
+        return new a.constructor(multResut[0].number, sign);
+    }
+
+    /**
+     * Div function return the division of two Int instances
+     * @property {Int} numA - first num to make multiply
+     * @property {Int} numB - second num to make multiply
+     * @return {Int}
+     * */
+    div(numA, numB, remainder = false) {
+        let a = numA;
+        let b = numB;
+
+        // bug with eslint
+        // eslint-disable-next-line no-unused-vars
+        let remaind = remainder;
+        if (this.constructor.name === 'Int' && !numB) {
+            a = this;
+            b = numA;
+            remaind = !!numB;
+        }
+        const sign = !!(a.sign ^ b.sign);
+        a = a.abs();
+        b = b.abs();
+
+        if (a.number.length < b.number.length) {
+            if (remaind) {
+                return new a.constructor(a.toString());
+            }
+            return new a.constructor('0');
+        }
+
+        let result = [];
+        let i = 0;
+        const aDigits = a.number.split('');
+        while (aDigits.length > 0) {
+            let digit = 0;
+            const processingDigits = aDigits.splice(0, i === 0 ? b.number.length : 1);
+
+            while ((new a.constructor(processingDigits.join(''))).compare(b, '<') && aDigits.length > 0) {
+                result.push('0');
+                processingDigits.push(aDigits.splice(0, 1).join(''));
+            } if ((new a.constructor(processingDigits.join(''))).compare(b, '<') && aDigits.length === 0) {
+                result = result.concat((new Array(processingDigits.length).fill('0')));
+            }
+
+            const processingNumber = new a.constructor(processingDigits.join(''));
+            let multiply = b.mult(new a.constructor(digit.toString()));
+
+            while (multiply.compare(processingNumber, '<')) {
+                digit++;
+                multiply = b.mult(new a.constructor(digit.toString()));
+            }
+            multiply = b.mult(new a.constructor(digit.toString()));
+            if (!multiply.compare(processingNumber, '<') && !multiply.compare(processingNumber, '==')) {
+                digit--;
+                multiply = b.mult(new a.constructor(digit.toString()));
+            }
+
+            result.push(digit.toString());
+            const unshift = processingNumber.substr(multiply).number;
+
+            if (unshift !== '0' && !!aDigits[0]) {
+                aDigits[0] = unshift + aDigits[0];
+            }
+            i++;
+        }
+
+        result = result.reverse();
+        truncateZero(result);
+        result = result.reverse();
+
+        const r = result.join('');
         return new a.constructor(r, sign);
     }
 }

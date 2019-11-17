@@ -131,6 +131,11 @@ describe('Int test', () => {
             const a = new Int('0');
             assert.equal(a.substr(b), '0');
         });
+        it('1000 - 1 = 999', () => {
+            const b = new Int('1');
+            const a = new Int('1000');
+            assert.equal(a.substr(b), '999');
+        });
         it('-99 - -999999999999999 = 0', () => {
             const b = new Int('-999999999999999');
             const a = new Int('-99');

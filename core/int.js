@@ -1,11 +1,21 @@
 const Bignum = require('./bignum');
 
+function truncateZero(array) {
+    while (array[array.length - 1] === '0' && array.length > 1) {
+        array.pop();
+    }
+}
+
 class Int extends Bignum {
     constructor(number, sign) {
         super();
 
-        this.number = number.slice(number.indexOf('-') + 1);
-        this.sign = typeof sign === 'boolean' ? sign : number.indexOf('-') === 0;
+        const numArray = number.split('').reverse();
+        truncateZero(numArray);
+        const num = numArray.reverse().join('');
+
+        this.number = num.slice(num.indexOf('-') + 1);
+        this.sign = typeof sign === 'boolean' ? sign : num.indexOf('-') === 0;
     }
 
     abs() {
