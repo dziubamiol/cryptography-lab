@@ -291,6 +291,11 @@ class Bignum {
             while ((new a.constructor(processingDigits.join(''))).compare(b, '<') && aDigits.length > 0) {
                 result.push('0');
                 processingDigits.push(aDigits.splice(0, 1).join(''));
+                if (processingDigits[0] === '0') {
+                    while (processingDigits[0] === '0') {
+                        processingDigits.splice(0, 1);
+                    }
+                }
             } if ((new a.constructor(processingDigits.join(''))).compare(b, '<') && aDigits.length === 0) {
                 result = result.concat((new Array(processingDigits.length).fill('0')));
             }
@@ -307,8 +312,9 @@ class Bignum {
                 digit--;
                 multiply = b.mult(new a.constructor(digit.toString()));
             }
-
-            result.push(digit.toString());
+            if (digit !== 0) {
+                result.push(digit.toString());
+            }
             const unshift = processingNumber.substr(multiply).number;
 
             if (unshift !== '0' && !!aDigits[0]) {
@@ -323,6 +329,61 @@ class Bignum {
 
         const r = result.join('');
         return new a.constructor(r, sign);
+    }
+
+    /**
+     * Sqrt function return square root of Int instance
+     * @property {Int} num - num to calculate sqrt
+     * @return {Int}
+     * */
+    sqrt(num) {
+        let a = num;
+
+        if (this.constructor.name === 'Int' && !num) {
+            a = this;
+        }
+
+        if (a.compare(new a.constructor('0'), '<')) {
+            throw new Error('Smaller than zero');
+        }
+
+        let resultN = a.copy().div(new a.constructor('2'));
+        let resultN1 = a.copy().div(new a.constructor('2'));
+        let iterate = true;
+        while (iterate) {
+            const divisionSonX = a.div(resultN);
+            const sum = resultN.sum(divisionSonX);
+            resultN1 = sum.div(new a.constructor('2'));
+
+            iterate = !resultN.compare(resultN1, '==');
+            resultN = resultN1;
+        }
+
+        return resultN1;
+    }
+
+    /**
+     * Pow function return the power of two Int instances
+     * @property {Int} num - num to make power
+     * @property {Int} numB - power
+     * @return {Int}
+     * */
+    pow(num, power) {
+        let a = num;
+        let pwr = power;
+
+        if (this.constructor.name === 'Int' && !power) {
+            a = this;
+            pwr = num;
+        }
+
+        let result = new a.constructor('1');
+        while (!pwr.compare(new a.constructor('0'), '==')) {
+            result = result.mult(a);
+            pwr = pwr.substr(new a.constructor('1'));
+        }
+
+        return result;
     }
 }
 

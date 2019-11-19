@@ -25,6 +25,10 @@ class Int extends Bignum {
     toString() {
         return this.sign ? `-${this.number}` : this.number;
     }
+
+    copy() {
+        return new Int(this.number, this.sign);
+    }
 }
 
 module.exports = Int;
