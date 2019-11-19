@@ -362,6 +362,24 @@ class Bignum {
         return resultN1;
     }
 
+    toBinary(num) {
+        let a = num;
+
+        if (this.constructor.name === 'Int' && !num) {
+            a = this;
+        }
+
+        let division = a;
+        const result = [];
+        while (!division.compare(new a.constructor('0'), '==') && !division.compare(new a.constructor('1'), '==')) {
+            result.push(this.mod(division, new a.constructor('2')).number);
+            division = division.div(new a.constructor('2'));
+        }
+        result.push(division.number);
+
+        return result.reverse();
+    }
+
     /**
      * Pow function return the power of two Int instances
      * @property {Int} num - num to make power
@@ -378,9 +396,141 @@ class Bignum {
         }
 
         let result = new a.constructor('1');
-        while (!pwr.compare(new a.constructor('0'), '==')) {
-            result = result.mult(a);
-            pwr = pwr.substr(new a.constructor('1'));
+        const binary = pwr.toBinary().reverse();
+        let powerOfTwo = a;
+
+        // disable for for ... of ... syntax
+        // eslint-disable-next-line no-restricted-syntax
+        for (const digit of binary) {
+            if (digit === '1') {
+                result = result.mult(powerOfTwo);
+            }
+            powerOfTwo = powerOfTwo.mult(powerOfTwo);
+        }
+
+        return result;
+    }
+
+    /**
+     * Mod function return the module of Int and Int instances
+     * @property {Int} num - num to make power
+     * @property {Int} mod - module
+     * @return {Int}
+     * */
+    mod(num, mod) {
+        let a = num;
+        let m = mod;
+
+        if (this.constructor.name === 'Int' && !m) {
+            a = this;
+            m = num;
+        }
+
+        let result = a.div(m);
+
+        result = a.substr(result.mult(m));
+
+        return result;
+    }
+
+    sumMod(numA, numB, mod) {
+        let a = numA;
+        let b = numB;
+        let m = mod;
+
+        if (this.constructor.name === 'Int' && !mod) {
+            a = this;
+            b = numA;
+            m = numB;
+        }
+
+        a = a.mod(a, m);
+        b = b.mod(b, m);
+
+        const sum = a.sum(b);
+
+        return sum.mod(sum, m);
+    }
+
+    substrMod(numA, numB, mod) {
+        let a = numA;
+        let b = numB;
+        let m = mod;
+
+        if (this.constructor.name === 'Int' && !mod) {
+            a = this;
+            b = numA;
+            m = numB;
+        }
+
+        a = a.mod(a, m);
+        b = b.mod(b, m);
+
+        const sum = a.substr(b);
+
+        return sum.mod(sum, m);
+    }
+
+    multMod(numA, numB, mod) {
+        let a = numA;
+        let b = numB;
+        let m = mod;
+
+        if (this.constructor.name === 'Int' && !mod) {
+            a = this;
+            b = numA;
+            m = numB;
+        }
+
+        a = a.mod(a, m);
+        b = b.mod(b, m);
+
+        const sum = a.mult(b);
+
+        return sum.mod(sum, m);
+    }
+
+    divMod(numA, numB, mod) {
+        let a = numA;
+        let b = numB;
+        let m = mod;
+
+        if (this.constructor.name === 'Int' && !mod) {
+            a = this;
+            b = numA;
+            m = numB;
+        }
+
+        const pow = m.substr(new a.constructor('2'));
+        const powB = b.pow(pow);
+        const reversedB = this.mod(powB, m);
+        const mult = reversedB.mult(a);
+
+        return this.mod(mult, m);
+    }
+
+    powMod(numA, power, mod) {
+        let a = numA;
+        let pwr = power;
+        let m = mod;
+
+        if (this.constructor.name === 'Int' && !mod) {
+            a = this;
+            pwr = numA;
+            m = power;
+        }
+
+        let result = new a.constructor('1');
+        const binary = pwr.toBinary().reverse();
+        let powerOfTwo = a;
+
+        // disable for for ... of ... syntax
+        // eslint-disable-next-line no-restricted-syntax
+        for (const digit of binary) {
+            if (digit === '1') {
+                result = this.mod(result.mult(powerOfTwo), m);
+            }
+            powerOfTwo = powerOfTwo.mult(powerOfTwo);
         }
 
         return result;
