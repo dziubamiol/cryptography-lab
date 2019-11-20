@@ -535,6 +535,71 @@ class Bignum {
 
         return result;
     }
+
+    bezout(numA, numB) {
+        let a = numA;
+        let b = numB;
+
+        if (this.constructor.name === 'Int' && !numB) {
+            a = this;
+            b = numA;
+        }
+
+        const Int = a.constructor;
+
+        let x = new Int('1');
+        let xx = new Int('0');
+        let y = new Int('0');
+        let yy = new Int('1');
+
+        while (!b.compare(new Int('0'), '==')) {
+            const q = a.div(b);
+
+            const tempB = this.mod(a, b);
+            a = b.copy();
+            b = tempB;
+
+            const tempXX = x.substr(xx.mult(q));
+            x = xx;
+            xx = tempXX;
+
+            const tempYY = y.substr(yy.mult(q));
+            y = yy;
+            yy = tempYY;
+        }
+
+        return { x, y };
+    }
+
+    static solve(equation) {
+        const Int = equation[0].num.constructor;
+
+        let M = new Int('1');
+        for (let i = 0; i < equation.length; i++) {
+            M = M.mult(equation[i].mod);
+        }
+        const varsArray = [];
+
+        // eslint-disable-next-line no-restricted-syntax
+        for (const line of equation) {
+            varsArray.push({
+                b: line.num,
+                n: M.div(line.mod),
+                m: line.mod,
+            });
+        }
+
+        let sum = new Int('0');
+        // eslint-disable-next-line no-restricted-syntax
+        for (const varibles of varsArray) {
+            const { x } = varibles.n.bezout(varibles.m);
+            varibles.k = x;
+
+            sum = sum.sum(varibles.b.mult(varibles.n).mult(varibles.k));
+        }
+
+        return { num: sum, mod: M };
+    }
 }
 
 
